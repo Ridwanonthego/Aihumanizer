@@ -259,7 +259,7 @@ const App: React.FC = () => {
             <div className="container mx-auto mt-6 w-full max-w-7xl">
                  <div className="mb-6 p-4 bg-white border-2 border-black rounded-lg shadow-[8px_8px_0px_#A78BFA]">
                     <label htmlFor="api-key" className="block text-lg font-bold text-black mb-2">
-                        Gemini API Key
+                        Gemini API Key <span className="text-red-500">*</span>
                     </label>
                     <div className="flex items-center gap-2">
                         <input
@@ -270,10 +270,11 @@ const App: React.FC = () => {
                             placeholder="Paste your API key here..."
                             className="w-full p-3 border-2 border-black rounded-md focus:outline-none focus:ring-4 focus:ring-purple-400 transition-shadow text-base bg-white text-black"
                         />
-                        <button onClick={() => setShowApiInfo(true)} title="How to get an API Key" className="p-2 bg-gray-200 border-2 border-black rounded-full hover:bg-gray-300">
+                        <button onClick={() => setShowApiInfo(true)} title="How to get an API Key" className="p-2 bg-gray-200 border-2 border-black rounded-full hover:bg-gray-300 text-red-500">
                            <Icon path="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" className="w-6 h-6" />
                         </button>
                     </div>
+                    {!apiKey && <p className="text-sm text-red-600 mt-2 font-bold">An API key is required for the app to function.</p>}
                 </div>
             </div>
             <main className="container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">

@@ -1,0 +1,5 @@
+{
+  "name": "AI Content Humanizer",
+  "description": "An application to detect AI-generated content with detailed analysis and then rewrite it to appear more human-like, bypassing AI detectors.",
+  "requestFramePermissions": []
+}

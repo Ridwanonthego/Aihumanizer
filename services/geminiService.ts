@@ -1,12 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import type { AnalysisResult } from '../types';
 
-if (!process.env.API_KEY) {
-    throw new Error("API_KEY environment variable is not set.");
-}
-
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 const analysisSchema = {
     type: Type.OBJECT,
     properties: {
@@ -46,7 +40,11 @@ const analysisSchema = {
     required: ['aiScore', 'summary', 'perplexity', 'burstiness', 'uniformity'],
 };
 
-export const detectAIContent = async (text: string): Promise<AnalysisResult> => {
+export const detectAIContent = async (apiKey: string, text: string): Promise<AnalysisResult> => {
+    if (!apiKey) {
+        throw new Error("Gemini API Key is missing.");
+    }
+    const ai = new GoogleGenAI({ apiKey });
     try {
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
@@ -69,43 +67,41 @@ Based on this strict analysis, provide a detailed breakdown and a percentage sco
 
     } catch (error) {
         console.error("Error detecting AI content:", error);
-        throw new Error("Failed to analyze content. The model may have returned an invalid response.");
+        throw new Error("Failed to analyze content. The model may have returned an invalid response or the API key may be invalid.");
     }
 };
 
-export const humanizeText = async (text: string): Promise<string> => {
+export const humanizeText = async (apiKey: string, text: string): Promise<string> => {
+     if (!apiKey) {
+        throw new Error("Gemini API Key is missing.");
+    }
+    const ai = new GoogleGenAI({ apiKey });
     try {
-        const prompt = `You are a master of literary disguise. Your mission is to take robotic, AI-generated text and transform it into something so authentically human that it bypasses every AI detector on the planet. Think of yourself as a writer for The New Yorker who's been asked to rewrite a corporate memo to sound like a gripping, personal essay.
+        const prompt = `You are an advanced AI humanizer bot. Your sole purpose is to rewrite AI-generated text to be completely indistinguishable from human writing. You must aggressively apply the following techniques to achieve this goal.
 
-**Core Philosophy: Embrace Imperfection and Chaos.**
-AI is predictable. Humans are not. Your rewrite must feel like it was written by a real person with unique quirks, a distinct voice, and a slightly chaotic thought process.
+**1. Structural Variation (The Chaos Principle):**
+- **Sentence Lengths:** Create jarring and unpredictable shifts in sentence length. Follow a very short sentence (3-5 words) with a much longer, complex one. Avoid rhythmic, medium-length sentences.
+- **Paragraph Structure:** Decimate the original paragraph structure. Create some single-sentence paragraphs for emphasis. Merge other paragraphs. The structure must feel organic and not uniform.
+- **Sentence Starters:** Actively hunt down and eliminate repetitive sentence starters. If two consecutive sentences start with a similar structure or word, rewrite one.
 
-**The Humanization Matrix (Follow these rules without fail):**
+**2. Vocabulary & Phrasing (The Authenticity Engine):**
+- **Ditch Formality:** Replace formal, academic words with simpler, more common alternatives. (e.g., 'utilize' -> 'use', 'facilitate' -> 'help', 'imperative' -> 'a must', 'a testament to' -> 'shows').
+- **Use Contractions:** Liberally use contractions like "it's", "don't", "you've", "we're".
+- **Inject Personality:** Add idioms, casual phrases, and rhetorical questions to give the text a voice. (e.g., "So, what's the bottom line?", "It's a no-brainer.").
 
-1.  **Structural Anarchy:**
-    *   **Sentence Whiplash:** Create extreme variations in sentence length. Juxtapose a three-word sentence with a 30-word one.
-    *   **Paragraph Schizophrenia:** Obliterate the original paragraph structure. Some paragraphs should be a single, punchy sentence. Others can be long and meandering. No two consecutive paragraphs should feel similar in length or structure. This is the most critical rule.
-    *   **Rebellious Openings:** Never start sentences with the same word or phrase back-to-back. Hunt down and destroy repetitive sentence starters.
+**3. Punctuation & Flow (The Rhythm Section):**
+- **Vary Punctuation:** Don't just use periods and commas. Use em-dashes (—) for asides or emphasis. Use semicolons (;) to link closely related ideas. The goal is to create a natural, spoken rhythm.
 
-2.  **Voice and Vernacular:**
-    *   **Talk, Don't Write:** Use contractions liberally (it's, don't, you've). Write as if you're explaining the topic to a smart friend over coffee.
-    *   **Inject Your Soul:** Use idioms, metaphors, and even a rhetorical question or two. Give the text a point of view. Example: Instead of "The data indicates a trend," try "So what's this data really telling us? It looks like..."
-    *   **The AI Word Hitlist:** Eradicate these words and their ilk: utilize, leverage, delve into, a testament to, navigate, foster, underscore, intricate, multifaceted. Replace them with simple, direct language.
-    *   **The Repetition Tax:** Pretend you have to pay a steep tax every time you repeat a non-essential word or phrase. This forces variety.
+**Example of what to avoid (robotic input):**
+"Economic reforms in Bangladesh during 2024 were a whirlwind of changes, largely sparked by a turbulent political climate. An interim government stepped in and immediately got down to business, aiming to steady the economy and get things back on a path of sustainable growth. Let's break down what happened, why it happened, and what kind of ripple effects we've seen so far."
 
-3.  **Punctuation Personality:**
-    *   Go beyond periods and commas. Use em-dashes (—) for dramatic pauses or asides. Use semicolons (;) to connect related but independent thoughts. Use punctuation to create rhythm, not just to follow grammatical rules.
+**Example of desired human-like output:**
+"2024 was a chaotic year for Bangladesh's economy, and politics was squarely to blame. An interim government had to jump in and start pulling levers, just trying to stop the bleeding and find some stability. So how'd we get here, and what did they actually do?"
 
-**Example Transformation:**
-*   **AI Input:** "The primary objective of this initiative is the strategic implementation of data-driven methodologies to enhance consumer engagement. This approach facilitates a comprehensive understanding of market dynamics."
-*   **Human Output:** "So, what's the big idea here? We're basically just using data to figure out what people actually *want*. Once you get that, connecting with them is the easy part. It's not rocket science."
+**Your Task:**
+Rewrite the following text. Do not add any commentary before or after. Your output must ONLY be the rewritten text.
 
-**Final Command:**
-*   Preserve the core meaning, facts, and data of the original text.
-*   Do NOT include any preamble or post-amble. Your output must be ONLY the rewritten text.
-
-Now, transform this text:
-
+Original Text:
 "${text}"`;
 
         const response = await ai.models.generateContent({
@@ -121,6 +117,6 @@ Now, transform this text:
         return response.text.trim();
     } catch (error) {
         console.error("Error rewriting text:", error);
-        throw new Error("Failed to humanize content.");
+        throw new Error("Failed to humanize content. The model may have returned an invalid response or the API key may be invalid.");
     }
 };
